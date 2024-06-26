@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"flag"
 	"os"
 	"time"
 
@@ -21,6 +20,29 @@ type GRPCConfig struct {
 	Timeout time.Duration `yaml:"timeout" env-required:"true"`
 }
 
+type DatabaseURLConfig struct {
+	Host     string
+	User     string
+	Password string
+	DBName   string
+	Port     string
+}
+
+func MustLoadDatabaseURL() DatabaseURLConfig {
+	host := os.Getenv("POSTGRES_HOST")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	db_name := os.Getenv("POSTGRES_DB")
+	port := os.Getenv("POSTGRES_PORT")
+	
+	return DatabaseURLConfig{
+		Host:     host,
+		User:     user,
+		Password: password,
+		DBName:   db_name,
+		Port:     port,
+	}
+}
 func MustLoad() *Config {
 	configPath := fetchConfigPath()
 	if configPath == "" {
@@ -40,12 +62,6 @@ func MustLoad() *Config {
 }
 
 func fetchConfigPath() string {
-	var res string
-	flag.StringVar(&res, "config", "", "path to the config file")
-	flag.Parse()
-	if res != "" {
-		return res
-	}
-	res = os.Getenv("CONFIG_PATH")
+	res := os.Getenv("CONFIG_PATH")
 	return res
 }
